@@ -1,4 +1,3 @@
-
 import * as Tone from 'tone';
 import type { AnalysisResult, Volumes } from '../types';
 import { PlaybackState } from '../types';
@@ -10,9 +9,9 @@ type SetPlaybackState = (state: PlaybackState) => void;
 type UpdateNeckCallback = (gridIndex: number) => void;
 
 export class ToneService {
-    private bassSynth: Tone.MonoSynth;
-    private chordSynth: Tone.PolySynth;
-    private metronome: Tone.MembraneSynth;
+    private bassSynth!: Tone.MonoSynth;
+    private chordSynth!: Tone.PolySynth;
+    private metronome!: Tone.MembraneSynth;
     private part: Tone.Part | null = null;
     private countdownPart: Tone.Part | null = null;
     private currentLoopEndMeasures: number = 0;
@@ -29,7 +28,10 @@ export class ToneService {
         this.setActiveGridIndex = setActiveGridIndex;
         this.setPlaybackState = setPlaybackState;
         this.updateNeckCallback = updateNeckCallback;
+    }
 
+    async init() {
+        // Defer synth creation until the audio context is running.
         this.bassSynth = new Tone.MonoSynth({
             oscillator: { type: 'fatsawtooth' },
             envelope: { attack: 0.01, decay: 0.2, sustain: 0.1, release: 0.5 },
@@ -49,17 +51,12 @@ export class ToneService {
         }).toDestination();
     }
     
-    async startContext() {
-        if (Tone.context.state !== 'running') {
-            await Tone.start();
-        }
-    }
-
     setTempo(bpm: number) {
         Tone.Transport.bpm.value = bpm;
     }
 
     setVolume(instrument: keyof Volumes, value: number) {
+        if (!this.bassSynth) return; // Not initialized yet
         switch (instrument) {
             case 'bass': this.bassSynth.volume.value = value; break;
             case 'chord': this.chordSynth.volume.value = value; break;
@@ -114,7 +111,6 @@ export class ToneService {
             }
         }
         
-        // FIX: Added 'this' to access class property.
         const loopEndCells = this.currentLoopEndMeasures * 2;
         for (let i = 0; i < loopEndCells; i++) {
             const beat = i * 2;
@@ -191,8 +187,10 @@ export class ToneService {
             this.part = null;
         }
         
-        this.bassSynth.triggerRelease();
-        this.chordSynth.releaseAll();
+        if(this.bassSynth) {
+             this.bassSynth.triggerRelease();
+             this.chordSynth.releaseAll();
+        }
 
         Tone.Transport.stop();
         Tone.Transport.cancel(0);

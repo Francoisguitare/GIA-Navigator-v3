@@ -12,12 +12,12 @@ import PlayerControls from './components/PlayerControls';
 import AnalysisSection from './components/AnalysisSection';
 import InfoModal from './components/InfoModal';
 import YouTubeBackingTrack from './components/YouTubeBackingTrack';
+import * as Tone from 'tone';
 
 const XP_PER_ACTION = 10;
 const PRACTICE_TIME_GOAL_SECONDS = 15 * 60; // 15 minutes
 
 const App: React.FC = () => {
-    const [isInitialized, setIsInitialized] = useState(false);
     const [chords, setChords] = useState<string[]>(Array(TOTAL_CELLS).fill(''));
     const [analysisResults, setAnalysisResults] = useState<AnalysisResult[]>([]);
     const [key, setKey] = useState<Key | null>(null);
@@ -115,8 +115,6 @@ const App: React.FC = () => {
     }, [chords, updateAnalysis]);
 
     useEffect(() => {
-        if (!isInitialized) return;
-        
         if (playbackState === PlaybackState.Stopped) {
             const firstSelectedNote = analysisResults.find(r => r.selectedNote)?.selectedNote;
             if (firstSelectedNote) {
@@ -125,50 +123,7 @@ const App: React.FC = () => {
                 setNeckNotes({});
             }
         }
-    }, [playbackState, analysisResults, isInitialized]);
-    
-    const initializeAudio = useCallback(() => {
-        if (!toneService.current) {
-            toneService.current = new ToneService(
-                setActiveGridIndex, 
-                setPlaybackState,
-                (index) => updateNeckForPlayback(index)
-            );
-            toneService.current.setTempo(tempo);
-            Object.entries(volumes).forEach(([instrument, volume]) => {
-                toneService.current?.setVolume(instrument as keyof Volumes, volume);
-            });
-        }
-        setIsInitialized(true);
-    }, [tempo, volumes]);
-
-    const handlePlayStop = useCallback(async () => {
-        if (!isInitialized) {
-            initializeAudio();
-        }
-
-        await toneService.current?.startContext();
-
-        if (playbackState !== PlaybackState.Stopped) {
-            toneService.current?.stop();
-        } else {
-            const firstChord = chords.find(c => c.trim() !== '');
-            if (firstChord) {
-                addXp(XP_PER_ACTION * 2);
-                toneService.current?.play(chords, analysisResults, notePositions);
-            }
-        }
-    }, [isInitialized, initializeAudio, playbackState, chords, analysisResults, notePositions, addXp]);
-
-    const handleTempoChange = useCallback((newTempo: number) => {
-        setTempo(newTempo);
-        toneService.current?.setTempo(newTempo);
-    }, []);
-
-    const handleVolumeChange = useCallback((instrument: keyof Volumes, volume: number) => {
-        setVolumes(prev => ({ ...prev, [instrument]: volume }));
-        toneService.current?.setVolume(instrument, volume);
-    }, []);
+    }, [playbackState, analysisResults]);
     
     const updateNeckForPlayback = useCallback((gridIndex: number) => {
         let currentAnalysis = null;
@@ -193,6 +148,45 @@ const App: React.FC = () => {
         });
     }, [analysisResults]);
 
+    const handlePlayStop = useCallback(async () => {
+        if (!toneService.current) {
+            await Tone.start();
+            const newToneService = new ToneService(
+                setActiveGridIndex,
+                setPlaybackState,
+                (index) => updateNeckForPlayback(index)
+            );
+            await newToneService.init();
+            toneService.current = newToneService;
+            
+            // Set initial values after creation
+            toneService.current.setTempo(tempo);
+            Object.entries(volumes).forEach(([instrument, volume]) => {
+                toneService.current?.setVolume(instrument as keyof Volumes, volume);
+            });
+        }
+
+        if (playbackState !== PlaybackState.Stopped) {
+            toneService.current?.stop();
+        } else {
+            const firstChord = chords.find(c => c.trim() !== '');
+            if (firstChord) {
+                addXp(XP_PER_ACTION * 2);
+                toneService.current?.play(chords, analysisResults, notePositions);
+            }
+        }
+    }, [playbackState, chords, analysisResults, notePositions, addXp, updateNeckForPlayback, tempo, volumes]);
+
+    const handleTempoChange = useCallback((newTempo: number) => {
+        setTempo(newTempo);
+        toneService.current?.setTempo(newTempo);
+    }, []);
+
+    const handleVolumeChange = useCallback((instrument: keyof Volumes, volume: number) => {
+        setVolumes(prev => ({ ...prev, [instrument]: volume }));
+        toneService.current?.setVolume(instrument, volume);
+    }, []);
+    
     const handleChordChange = useCallback((index: number, value: string) => {
         const newChords = [...chords];
         if (newChords[index] !== value) {
