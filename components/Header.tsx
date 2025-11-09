@@ -1,8 +1,8 @@
 
 import React, { useState, useEffect } from 'react';
-import { FullscreenEnterIcon, FullscreenExitIcon } from './Icons';
+import { FullscreenEnterIcon, FullscreenExitIcon } from './Icons.js';
 
-const Header: React.FC = () => {
+const Header = () => {
     const [isFullscreen, setIsFullscreen] = useState(false);
 
     const toggleFullScreen = () => {

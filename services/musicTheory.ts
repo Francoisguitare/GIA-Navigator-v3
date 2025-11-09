@@ -1,15 +1,14 @@
 
-import type { AnalysisResult, Key, NoteInfo, TargetNoteOption, FrontGIA } from '../types';
-import { NOTES, MAJOR_SCALE_INTERVALS, MAJOR_PENTATONIC_INTERVALS, MINOR_PENTATONIC_INTERVALS, TUNING } from '../constants';
+import { NOTES, MAJOR_SCALE_INTERVALS, MAJOR_PENTATONIC_INTERVALS, MINOR_PENTATONIC_INTERVALS, TUNING } from '../constants.js';
 
 export class NotePositions {
-    private positions: Record<string, [number, number][]> = {};
+    positions = {};
 
     constructor() {
         this.calculateNotePositions();
     }
 
-    private calculateNotePositions() {
+    calculateNotePositions() {
         NOTES.sharp.forEach(note => this.positions[note] = []);
         NOTES.flat.forEach(note => this.positions[note] = []);
 
@@ -31,12 +30,12 @@ export class NotePositions {
         }
     }
     
-    public get(note: string): [number, number][] {
+    get(note) {
         return this.positions[note] || [];
     }
 }
 
-export function getNoteInfo(noteName: string): NoteInfo {
+export function getNoteInfo(noteName) {
     if (!noteName || typeof noteName !== 'string') return { root: '?', index: -1 };
     
     const match = noteName.match(/^([A-G])([#b]?)/);
@@ -49,13 +48,13 @@ export function getNoteInfo(noteName: string): NoteInfo {
     if (sharpIndex !== -1) return { root, index: sharpIndex };
     if (flatIndex !== -1) return { root, index: flatIndex };
 
-    const map: Record<string, string> = { 'A#': 'Bb', 'C#': 'Db', 'D#': 'Eb', 'F#': 'Gb', 'G#': 'Ab' };
+    const map = { 'A#': 'Bb', 'C#': 'Db', 'D#': 'Eb', 'F#': 'Gb', 'G#': 'Ab' };
     const equivalentFlat = map[root] || root;
     const index = NOTES.flat.indexOf(equivalentFlat);
     return { root, index };
 }
 
-function getChordQuality(chordName: string): string {
+function getChordQuality(chordName) {
     if (!chordName) return '';
     if (chordName.includes('maj7') || chordName.includes('M7') || chordName.includes('Δ')) return 'major7';
     if (chordName.includes('m7') || chordName.includes('min7')) return 'minor7';
@@ -66,7 +65,7 @@ function getChordQuality(chordName: string): string {
     return 'major';
 }
 
-function getIntervalNote(rootNote: string, semitones: number, key: Key): string {
+function getIntervalNote(rootNote, semitones, key) {
     const rootInfo = getNoteInfo(rootNote);
     if (rootInfo.index === -1) return '?';
     const noteArray = key.keySignatureType === 'flat' ? NOTES.flat : NOTES.sharp;
@@ -74,7 +73,7 @@ function getIntervalNote(rootNote: string, semitones: number, key: Key): string 
     return noteArray[targetIndex];
 }
 
-function findDegree(chordName: string, key: Key): string {
+function findDegree(chordName, key) {
     const chordRootInfo = getNoteInfo(chordName);
     if (chordRootInfo.index === -1) return '?';
     const keyRootIndex = getNoteInfo(key.root).index;
@@ -122,7 +121,7 @@ function findDegree(chordName: string, key: Key): string {
     return alteration + degree;
 }
 
-export function getScaleNotes(key: Key): string[] {
+export function getScaleNotes(key) {
     const noteArray = key.keySignatureType === 'flat' ? NOTES.flat : NOTES.sharp;
     const intervals = key.type === 'major' ? MAJOR_SCALE_INTERVALS : [0, 2, 3, 5, 7, 8, 10]; // natural minor
     const rootIndex = getNoteInfo(key.root).index;
@@ -130,7 +129,7 @@ export function getScaleNotes(key: Key): string[] {
     return intervals.map(i => noteArray[(rootIndex + i) % 12]);
 }
 
-export function getPentatonicScaleNotes(key: Key, notePositions: NotePositions): string[] {
+export function getPentatonicScaleNotes(key, notePositions) {
     const noteArray = key.keySignatureType === 'flat' ? NOTES.flat : NOTES.sharp;
     const intervals = key.type === 'major' ? MAJOR_PENTATONIC_INTERVALS : MINOR_PENTATONIC_INTERVALS;
     const rootIndex = getNoteInfo(key.root).index;
@@ -138,7 +137,7 @@ export function getPentatonicScaleNotes(key: Key, notePositions: NotePositions):
     return intervals.map(i => noteArray[(rootIndex + i) % 12]);
 }
 
-function getChordTones(chordName: string, key: Key): string[] {
+function getChordTones(chordName, key) {
     const noteInfo = getNoteInfo(chordName);
     const quality = getChordQuality(chordName);
     if(noteInfo.index === -1) return [];
@@ -163,7 +162,7 @@ function getChordTones(chordName: string, key: Key): string[] {
 }
 
 
-function checkIfOutOfKey(chordName: string, key: Key, degree: string): boolean {
+function checkIfOutOfKey(chordName, key, degree) {
     const scaleNotes = getScaleNotes(key);
     if (!scaleNotes.length) return false;
     const scaleNotesIndices = scaleNotes.map(n => getNoteInfo(n).index);
@@ -184,8 +183,8 @@ function checkIfOutOfKey(chordName: string, key: Key, degree: string): boolean {
     return false;
 }
 
-function getExpressivePalette(front: FrontGIA, rootNote: string, key: Key): TargetNoteOption[] {
-    let palette: Omit<TargetNoteOption, 'type'>[] = [];
+function getExpressivePalette(front, rootNote, key) {
+    let palette = [];
     if (front === 'RÉSOLUTION') {
         palette = [
             { note: getIntervalNote(rootNote, 2, key), interval: '9e', intention: 'Lyrisme / Douceur', description: 'Émotion : Doux, apaisant. Action : Idéal pour les phrases longues et mélodiques.' },
@@ -203,7 +202,7 @@ function getExpressivePalette(front: FrontGIA, rootNote: string, key: Key): Targ
 }
 
 
-function analyzeSingleChord(chordName: string, key: Key, nextChordName: string): Omit<AnalysisResult, 'gridIndex' | 'analysisIndex'> {
+function analyzeSingleChord(chordName, key, nextChordName) {
     const noteInfo = getNoteInfo(chordName);
     const quality = getChordQuality(chordName);
     const degree = findDegree(chordName, key);
@@ -220,7 +219,7 @@ function analyzeSingleChord(chordName: string, key: Key, nextChordName: string):
         }
     }
 
-    let front: FrontGIA;
+    let front;
     if (isConfirmedDominant) {
         front = 'TENSION';
     } else if (isOutOfKey) {
@@ -231,7 +230,7 @@ function analyzeSingleChord(chordName: string, key: Key, nextChordName: string):
 
     const actionRythmique = front === 'TENSION' || front === 'OUT_OF_KEY' ? 'RAPIDE / AGRESSIF' : 'LENT / LYRIQUE';
     
-    let structuralNotes: TargetNoteOption[] = [];
+    let structuralNotes = [];
     structuralNotes.push({ note: noteInfo.root, interval: 'R', type: 'fondatrice', intention: 'Stabilité' });
     
     if (front === 'TENSION') {
@@ -258,13 +257,13 @@ function analyzeSingleChord(chordName: string, key: Key, nextChordName: string):
     };
 }
 
-function detectKey(firstChord: string): Key {
+function detectKey(firstChord) {
     const { root } = getNoteInfo(firstChord);
     const quality = getChordQuality(firstChord);
     const flatKeys = ['F', 'Bb', 'Eb', 'Ab', 'Db', 'Gb', 'Cb'];
     const flatMinorKeys = ['Dm', 'Gm', 'Cm', 'Fm', 'Bbm', 'Ebm']; 
     
-    let keySignatureType: 'sharp' | 'flat' = 'sharp';
+    let keySignatureType = 'sharp';
     if (flatKeys.includes(root) || flatMinorKeys.includes(root+'m') || root.includes('b')) {
         keySignatureType = 'flat';
     }
@@ -276,14 +275,14 @@ function detectKey(firstChord: string): Key {
 }
 
 
-export function analyzeProgression(chords: string[], notePositions: NotePositions): { key: Key | null; results: AnalysisResult[] } {
+export function analyzeProgression(chords, notePositions) {
     const firstChord = chords.find(c => c.trim());
     if (!firstChord) {
         return { key: null, results: [] };
     }
 
     const key = detectKey(firstChord);
-    const results: AnalysisResult[] = [];
+    const results = [];
 
     const activeChordsWithIndices = chords
         .map((chord, index) => ({ chord: chord.trim(), index }))

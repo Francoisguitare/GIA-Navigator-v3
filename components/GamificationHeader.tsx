@@ -1,15 +1,8 @@
+
 import React from 'react';
-import { LevelIcon, TimeIcon } from './Icons';
+import { LevelIcon, TimeIcon } from './Icons.js';
 
-interface GamificationHeaderProps {
-    level: number;
-    xp: number;
-    xpForNextLevel: number;
-    practiceTime: number; // in seconds
-    practiceTimeGoal: number; // in seconds
-}
-
-const ProgressBar: React.FC<{ value: number; max: number; colorClass: string }> = ({ value, max, colorClass }) => (
+const ProgressBar = ({ value, max, colorClass }) => (
     <div className="w-full bg-gray-700 rounded-full h-2.5">
         <div 
             className={`${colorClass} h-2.5 rounded-full transition-all duration-500`} 
@@ -18,9 +11,9 @@ const ProgressBar: React.FC<{ value: number; max: number; colorClass: string }> 
     </div>
 );
 
-const GamificationHeader: React.FC<GamificationHeaderProps> = ({ level, xp, xpForNextLevel, practiceTime, practiceTimeGoal }) => {
+const GamificationHeader = ({ level, xp, xpForNextLevel, practiceTime, practiceTimeGoal }) => {
 
-    const formatTime = (seconds: number) => {
+    const formatTime = (seconds) => {
         const mins = Math.floor(seconds / 60).toString().padStart(2, '0');
         const secs = (seconds % 60).toString().padStart(2, '0');
         return `${mins}:${secs}`;

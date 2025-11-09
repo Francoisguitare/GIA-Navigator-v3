@@ -1,29 +1,24 @@
-import * as Tone from 'tone';
-import type { AnalysisResult, Volumes } from '../types';
-import { PlaybackState } from '../types';
-import { getNoteInfo } from './musicTheory';
-import type { NotePositions } from './musicTheory';
 
-type SetActiveGridIndex = (index: number) => void;
-type SetPlaybackState = (state: PlaybackState) => void;
-type UpdateNeckCallback = (gridIndex: number) => void;
+import * as Tone from 'tone';
+import { PlaybackState } from '../constants.js';
+import { getNoteInfo } from './musicTheory.js';
 
 export class ToneService {
-    private bassSynth!: Tone.MonoSynth;
-    private chordSynth!: Tone.PolySynth;
-    private metronome!: Tone.MembraneSynth;
-    private part: Tone.Part | null = null;
-    private countdownPart: Tone.Part | null = null;
-    private currentLoopEndMeasures: number = 0;
+    bassSynth;
+    chordSynth;
+    metronome;
+    part = null;
+    countdownPart = null;
+    currentLoopEndMeasures = 0;
 
-    private setActiveGridIndex: SetActiveGridIndex;
-    private setPlaybackState: SetPlaybackState;
-    private updateNeckCallback: UpdateNeckCallback;
+    setActiveGridIndex;
+    setPlaybackState;
+    updateNeckCallback;
 
     constructor(
-        setActiveGridIndex: SetActiveGridIndex, 
-        setPlaybackState: SetPlaybackState,
-        updateNeckCallback: UpdateNeckCallback
+        setActiveGridIndex, 
+        setPlaybackState,
+        updateNeckCallback
     ) {
         this.setActiveGridIndex = setActiveGridIndex;
         this.setPlaybackState = setPlaybackState;
@@ -51,11 +46,11 @@ export class ToneService {
         }).toDestination();
     }
     
-    setTempo(bpm: number) {
+    setTempo(bpm) {
         Tone.Transport.bpm.value = bpm;
     }
 
-    setVolume(instrument: keyof Volumes, value: number) {
+    setVolume(instrument, value) {
         if (!this.bassSynth) return; // Not initialized yet
         switch (instrument) {
             case 'bass': this.bassSynth.volume.value = value; break;
@@ -64,7 +59,7 @@ export class ToneService {
         }
     }
 
-    private updateSchedule(chords: string[], analysisResults: AnalysisResult[], notePositions: NotePositions) {
+    updateSchedule(chords, analysisResults, notePositions) {
         if (this.part) this.part.dispose();
 
         const lastChordIndex = chords.map(c => c.trim()).lastIndexOf(chords.filter(c => c.trim()).pop() || '');
@@ -77,7 +72,7 @@ export class ToneService {
         const loopEndMeasures = Math.ceil(totalBeatsInProgression / 4);
         this.currentLoopEndMeasures = loopEndMeasures;
         const totalLoopBeats = loopEndMeasures * 4;
-        const events: any[] = [];
+        const events = [];
 
         for (let i = 0; i <= lastChordIndex; i++) {
             const chordName = chords[i];
@@ -146,7 +141,7 @@ export class ToneService {
         }
     }
     
-    play(chords: string[], analysisResults: AnalysisResult[], notePositions: NotePositions) {
+    play(chords, analysisResults, notePositions) {
         this.updateSchedule(chords, analysisResults, notePositions);
         if (this.currentLoopEndMeasures === 0) return;
 

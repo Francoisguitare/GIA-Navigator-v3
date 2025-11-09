@@ -1,51 +1,50 @@
+
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import type { AnalysisResult, Key, ModalContent, NeckNotesDisplay, NoteSelection, Volumes, SavedTrack } from './types';
-import { PlaybackState } from './types';
-import { TOTAL_CELLS, PRESET_PROGRESSIONS } from './constants';
-import { analyzeProgression as analyze, getPentatonicScaleNotes, getScaleNotes, NotePositions } from './services/musicTheory';
-import { ToneService } from './services/toneService';
-import Header from './components/Header';
-import GamificationHeader from './components/GamificationHeader';
-import InputGrid from './components/InputGrid';
-import GuitarNeck from './components/GuitarNeck';
-import PlayerControls from './components/PlayerControls';
-import AnalysisSection from './components/AnalysisSection';
-import InfoModal from './components/InfoModal';
-import YouTubeBackingTrack from './components/YouTubeBackingTrack';
+import { TOTAL_CELLS, PRESET_PROGRESSIONS, PlaybackState } from './constants.js';
+import { analyzeProgression as analyze, getPentatonicScaleNotes, getScaleNotes, NotePositions } from './services/musicTheory.js';
+import { ToneService } from './services/toneService.js';
+import Header from './components/Header.js';
+import GamificationHeader from './components/GamificationHeader.js';
+import InputGrid from './components/InputGrid.js';
+import GuitarNeck from './components/GuitarNeck.js';
+import PlayerControls from './components/PlayerControls.js';
+import AnalysisSection from './components/AnalysisSection.js';
+import InfoModal from './components/InfoModal.js';
+import YouTubeBackingTrack from './components/YouTubeBackingTrack.js';
 import * as Tone from 'tone';
 
 const XP_PER_ACTION = 10;
 const PRACTICE_TIME_GOAL_SECONDS = 15 * 60; // 15 minutes
 
-const App: React.FC = () => {
-    const [chords, setChords] = useState<string[]>(Array(TOTAL_CELLS).fill(''));
-    const [analysisResults, setAnalysisResults] = useState<AnalysisResult[]>([]);
-    const [key, setKey] = useState<Key | null>(null);
-    const [scaleNotes, setScaleNotes] = useState<string[]>([]);
-    const [pentatonicNotes, setPentatonicNotes] = useState<string[]>([]);
-    const [playbackState, setPlaybackState] = useState<PlaybackState>(PlaybackState.Stopped);
+const App = () => {
+    const [chords, setChords] = useState(Array(TOTAL_CELLS).fill(''));
+    const [analysisResults, setAnalysisResults] = useState([]);
+    const [key, setKey] = useState(null);
+    const [scaleNotes, setScaleNotes] = useState([]);
+    const [pentatonicNotes, setPentatonicNotes] = useState([]);
+    const [playbackState, setPlaybackState] = useState(PlaybackState.Stopped);
     const [tempo, setTempo] = useState(45);
-    const [volumes, setVolumes] = useState<Volumes>({ metro: -12, bass: -6, chord: -14 });
-    const [modalContent, setModalContent] = useState<ModalContent | null>(null);
+    const [volumes, setVolumes] = useState({ metro: -12, bass: -6, chord: -14 });
+    const [modalContent, setModalContent] = useState(null);
     const [activeGridIndex, setActiveGridIndex] = useState(-1);
-    const [neckNotes, setNeckNotes] = useState<NeckNotesDisplay>({});
+    const [neckNotes, setNeckNotes] = useState({});
     const [notePositions] = useState(() => new NotePositions());
     
     // YouTube State
-    const [activeYoutubeTrack, setActiveYoutubeTrack] = useState<SavedTrack | null>(null);
-    const [savedYoutubeTracks, setSavedYoutubeTracks] = useState<SavedTrack[]>([]);
+    const [activeYoutubeTrack, setActiveYoutubeTrack] = useState(null);
+    const [savedYoutubeTracks, setSavedYoutubeTracks] = useState([]);
     
     // Gamification State
     const [level, setLevel] = useState(1);
     const [xp, setXp] = useState(0);
     const [practiceTime, setPracticeTime] = useState(0);
     
-    const toneService = useRef<ToneService | null>(null);
-    const practiceTimerRef = useRef<number | null>(null);
+    const toneService = useRef(null);
+    const practiceTimerRef = useRef(null);
     
     const xpForNextLevel = level * 100;
 
-    const addXp = useCallback((amount: number) => {
+    const addXp = useCallback((amount) => {
         setXp(currentXp => {
             const neededXp = level * 100;
             const newXp = currentXp + amount;
@@ -61,7 +60,7 @@ const App: React.FC = () => {
         const savedTracksJSON = localStorage.getItem('gia-youtube-tracks');
         if (savedTracksJSON) {
             try {
-                const tracks: SavedTrack[] = JSON.parse(savedTracksJSON);
+                const tracks = JSON.parse(savedTracksJSON);
                 setSavedYoutubeTracks(tracks);
                 if (tracks.length > 0) {
                     setActiveYoutubeTrack(tracks[0]);
@@ -125,7 +124,7 @@ const App: React.FC = () => {
         }
     }, [playbackState, analysisResults]);
     
-    const updateNeckForPlayback = useCallback((gridIndex: number) => {
+    const updateNeckForPlayback = useCallback((gridIndex) => {
         let currentAnalysis = null;
         for (let i = gridIndex; i >= 0; i--) {
             const analysis = analysisResults.find(a => a.gridIndex === i);
@@ -162,7 +161,7 @@ const App: React.FC = () => {
             // Set initial values after creation
             toneService.current.setTempo(tempo);
             Object.entries(volumes).forEach(([instrument, volume]) => {
-                toneService.current?.setVolume(instrument as keyof Volumes, volume);
+                toneService.current?.setVolume(instrument, volume);
             });
         }
 
@@ -177,17 +176,17 @@ const App: React.FC = () => {
         }
     }, [playbackState, chords, analysisResults, notePositions, addXp, updateNeckForPlayback, tempo, volumes]);
 
-    const handleTempoChange = useCallback((newTempo: number) => {
+    const handleTempoChange = useCallback((newTempo) => {
         setTempo(newTempo);
         toneService.current?.setTempo(newTempo);
     }, []);
 
-    const handleVolumeChange = useCallback((instrument: keyof Volumes, volume: number) => {
+    const handleVolumeChange = useCallback((instrument, volume) => {
         setVolumes(prev => ({ ...prev, [instrument]: volume }));
         toneService.current?.setVolume(instrument, volume);
     }, []);
     
-    const handleChordChange = useCallback((index: number, value: string) => {
+    const handleChordChange = useCallback((index, value) => {
         const newChords = [...chords];
         if (newChords[index] !== value) {
             addXp(XP_PER_ACTION);
@@ -212,7 +211,7 @@ const App: React.FC = () => {
         setChords(newChords);
     }, [addXp]);
     
-    const handleTargetNoteChange = useCallback((analysisIndex: number, optionIndex: number) => {
+    const handleTargetNoteChange = useCallback((analysisIndex, optionIndex) => {
         const currentResult = analysisResults.find(res => res.analysisIndex === analysisIndex);
         if (currentResult?.selectedNote !== currentResult?.allTargetOptions[optionIndex]) {
             addXp(XP_PER_ACTION);
@@ -227,7 +226,7 @@ const App: React.FC = () => {
         setAnalysisResults(newResults);
     }, [analysisResults, addXp]);
 
-    const handleCardSelectionChange = (newSelections: NoteSelection[]) => {
+    const handleCardSelectionChange = (newSelections) => {
         if (newSelections.length > 0) {
             setNeckNotes({ multi: newSelections });
         } else if (playbackState === PlaybackState.Stopped) {
@@ -236,7 +235,7 @@ const App: React.FC = () => {
         }
     };
     
-    const handleSaveYouTubeTrack = (newTrack: SavedTrack) => {
+    const handleSaveYouTubeTrack = (newTrack) => {
         setSavedYoutubeTracks(currentTracks => {
             if (currentTracks.some(track => track.id === newTrack.id)) {
                 return currentTracks;
@@ -248,7 +247,7 @@ const App: React.FC = () => {
         setActiveYoutubeTrack(newTrack);
     };
 
-    const handleDeleteYouTubeTrack = (trackId: string) => {
+    const handleDeleteYouTubeTrack = (trackId) => {
         setSavedYoutubeTracks(currentTracks => {
             const updatedTracks = currentTracks.filter(track => track.id !== trackId);
             localStorage.setItem('gia-youtube-tracks', JSON.stringify(updatedTracks));

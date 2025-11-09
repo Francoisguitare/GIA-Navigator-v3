@@ -18,3 +18,9 @@ export const PRESET_PROGRESSIONS = [
     { name: "Pop/Rock Majeur", chords: ['C', '', 'G', '', 'Am', '', 'F', ''] },
     { name: "Blues 12 Mesures (en A)", chords: ['A7','','A7','','A7','','A7','','D7','','D7','','A7','','A7','','E7','','D7','','A7','','A7',''] }
 ];
+
+export const PlaybackState = {
+    Stopped: 'Stopped',
+    Countdown: 'Countdown',
+    Playing: 'Playing',
+};

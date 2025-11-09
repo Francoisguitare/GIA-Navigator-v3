@@ -1,19 +1,8 @@
 
 import React, { useState, useEffect } from 'react';
-import type { Key, AnalysisResult, ModalContent, NoteSelection } from '../types';
-import AnalysisCard from './AnalysisCard';
+import AnalysisCard from './AnalysisCard.js';
 
-interface AnalysisSectionProps {
-    keySignature: Key | null;
-    scaleNotes: string[];
-    analysisResults: AnalysisResult[];
-    setModalContent: (content: ModalContent | null) => void;
-    onTargetNoteChange: (analysisIndex: number, optionIndex: number) => void;
-    onCardSelectionChange: (selections: NoteSelection[]) => void;
-    isPlaybackActive: boolean;
-}
-
-const AnalysisSection: React.FC<AnalysisSectionProps> = ({
+const AnalysisSection = ({
     keySignature,
     scaleNotes,
     analysisResults,
@@ -22,7 +11,7 @@ const AnalysisSection: React.FC<AnalysisSectionProps> = ({
     onCardSelectionChange,
     isPlaybackActive,
 }) => {
-    const [selectedCardIndices, setSelectedCardIndices] = useState<Set<number>>(new Set());
+    const [selectedCardIndices, setSelectedCardIndices] = useState(new Set());
     const multiSelectColors = ['#FBBF24', '#34D399', '#F87171', '#60A5FA', '#EC4899', '#8B5CF6'];
 
     const handleExport = () => {
@@ -52,7 +41,7 @@ const AnalysisSection: React.FC<AnalysisSectionProps> = ({
         document.body.removeChild(link);
     };
 
-    const handleCardSelectToggle = (analysisIndex: number) => {
+    const handleCardSelectToggle = (analysisIndex) => {
         if (isPlaybackActive) return;
         const newSet = new Set(selectedCardIndices);
         if (newSet.has(analysisIndex)) {
@@ -70,7 +59,7 @@ const AnalysisSection: React.FC<AnalysisSectionProps> = ({
     }, [isPlaybackActive]);
     
     useEffect(() => {
-        const selections: NoteSelection[] = [];
+        const selections = [];
         const selectedArray = Array.from(selectedCardIndices);
         selectedArray.forEach((analysisIndex, i) => {
             const analysis = analysisResults.find(r => r.analysisIndex === analysisIndex);

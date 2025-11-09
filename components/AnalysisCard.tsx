@@ -1,10 +1,9 @@
-
 import React from 'react';
-import type { AnalysisResult, ModalContent } from '../types';
 
+// FIX: Define prop types for AnalysisCard and type it as a React.FC to allow React-specific props like 'key'.
 interface AnalysisCardProps {
-    analysis: AnalysisResult;
-    setModalContent: (content: ModalContent | null) => void;
+    analysis: any;
+    setModalContent: (content: { title: string; body: string } | null) => void;
     onTargetNoteChange: (analysisIndex: number, optionIndex: number) => void;
     isSelected: boolean;
     onSelectToggle: (analysisIndex: number) => void;
@@ -14,7 +13,7 @@ interface AnalysisCardProps {
 
 const AnalysisCard: React.FC<AnalysisCardProps> = ({ analysis, setModalContent, onTargetNoteChange, isSelected, onSelectToggle, selectionColor, isPlaybackActive }) => {
 
-    const handleBadgeClick = (e: React.MouseEvent) => {
+    const handleBadgeClick = (e) => {
         e.stopPropagation();
         let title = '', body = '';
         switch (analysis.front) {

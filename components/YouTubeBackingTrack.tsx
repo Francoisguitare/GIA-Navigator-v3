@@ -1,18 +1,10 @@
+
 import React, { useState } from 'react';
-import type { SavedTrack } from '../types';
-import { YouTubeIcon, ExternalLinkIcon, XIcon, SmallPlayIcon, EyeOffIcon } from './Icons';
+import { YouTubeIcon, ExternalLinkIcon, XIcon, SmallPlayIcon, EyeOffIcon } from './Icons.js';
 
-interface YouTubeBackingTrackProps {
-    activeTrack: SavedTrack | null;
-    savedTracks: SavedTrack[];
-    onSaveTrack: (track: SavedTrack) => void;
-    onSelectTrack: (track: SavedTrack) => void;
-    onDeleteTrack: (trackId: string) => void;
-}
-
-const getYoutubeVideoId = (url: string): string | null => {
+const getYoutubeVideoId = (url) => {
     if (!url) return null;
-    let videoId: string | null = null;
+    let videoId = null;
     const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
     const match = url.match(regExp);
     if (match && match[2].length === 11) {
@@ -21,7 +13,7 @@ const getYoutubeVideoId = (url: string): string | null => {
     return videoId;
 };
 
-const YouTubeBackingTrack: React.FC<YouTubeBackingTrackProps> = ({ activeTrack, savedTracks, onSaveTrack, onSelectTrack, onDeleteTrack }) => {
+const YouTubeBackingTrack = ({ activeTrack, savedTracks, onSaveTrack, onSelectTrack, onDeleteTrack }) => {
     const [inputValue, setInputValue] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [isPlayerVisible, setIsPlayerVisible] = useState(false);
@@ -41,7 +33,7 @@ const YouTubeBackingTrack: React.FC<YouTubeBackingTrackProps> = ({ activeTrack, 
             if (!response.ok) throw new Error('Could not fetch video metadata.');
             
             const data = await response.json();
-            const newTrack: SavedTrack = {
+            const newTrack = {
                 id: videoId,
                 url: trimmedUrl,
                 title: data.title || `Vidéo ${videoId}`
@@ -51,7 +43,7 @@ const YouTubeBackingTrack: React.FC<YouTubeBackingTrackProps> = ({ activeTrack, 
         } catch (error) {
             console.error("Error fetching YouTube title:", error);
             // Fallback for when oEmbed fails
-             const newTrack: SavedTrack = {
+             const newTrack = {
                 id: videoId,
                 url: trimmedUrl,
                 title: `Vidéo ${videoId}`
@@ -63,7 +55,7 @@ const YouTubeBackingTrack: React.FC<YouTubeBackingTrackProps> = ({ activeTrack, 
         }
     };
 
-    const handleSelectTrack = (track: SavedTrack) => {
+    const handleSelectTrack = (track) => {
         onSelectTrack(track);
         setIsPlayerVisible(false); // Hide player when selecting a new track
     }

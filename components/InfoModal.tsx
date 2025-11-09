@@ -1,16 +1,10 @@
 
 import React, { useEffect } from 'react';
-import type { ModalContent } from '../types';
 
-interface InfoModalProps {
-    modalContent: ModalContent | null;
-    setModalContent: (content: ModalContent | null) => void;
-}
-
-const InfoModal: React.FC<InfoModalProps> = ({ modalContent, setModalContent }) => {
+const InfoModal = ({ modalContent, setModalContent }) => {
     
     useEffect(() => {
-        const handleEsc = (event: KeyboardEvent) => {
+        const handleEsc = (event) => {
            if (event.key === 'Escape') {
             setModalContent(null);
            }

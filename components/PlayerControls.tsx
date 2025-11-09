@@ -1,18 +1,9 @@
+
 import React from 'react';
-import type { Volumes } from '../types';
-import { PlaybackState } from '../types';
-import { PlayIcon, StopIcon, MetronomeIcon, BassIcon, ChordIcon } from './Icons';
+import { PlaybackState } from '../constants.js';
+import { PlayIcon, StopIcon, MetronomeIcon, BassIcon, ChordIcon } from './Icons.js';
 
-interface PlayerControlsProps {
-    playbackState: PlaybackState;
-    onPlayStop: () => void;
-    tempo: number;
-    onTempoChange: (tempo: number) => void;
-    volumes: Volumes;
-    onVolumeChange: (instrument: keyof Volumes, value: number) => void;
-}
-
-const PlayerControls: React.FC<PlayerControlsProps> = ({
+const PlayerControls = ({
     playbackState,
     onPlayStop,
     tempo,

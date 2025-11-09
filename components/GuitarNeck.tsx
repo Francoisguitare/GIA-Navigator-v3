@@ -1,26 +1,20 @@
-
 import React, { useRef, useEffect, useState } from 'react';
-import type { NeckNotesDisplay, TargetNoteOption, NoteSelection } from '../types';
-import type { NotePositions } from '../services/musicTheory';
-
-interface GuitarNeckProps {
-    pentatonicNotes: string[];
-    displayNotes: NeckNotesDisplay;
-    notePositions: NotePositions;
-}
 
 const NUM_FRETS = 17;
 const NECK_HEIGHT = 140;
 const NUT_WIDTH = 50;
 
-const NoteDot: React.FC<{
+// FIX: Define prop types for NoteDot and type it as a React.FC to allow React-specific props like 'key'.
+interface NoteDotProps {
     cx: number;
     cy: number;
-    noteItem?: TargetNoteOption;
-    noteSelection?: NoteSelection;
+    noteItem?: any;
+    noteSelection?: any;
     isPreview?: boolean;
     isPlaybackActive: boolean;
-}> = ({ cx, cy, noteItem, noteSelection, isPreview, isPlaybackActive }) => {
+}
+
+const NoteDot: React.FC<NoteDotProps> = ({ cx, cy, noteItem, noteSelection, isPreview, isPlaybackActive }) => {
     const colors = {
         fondatrice: '#10B981', 
         expressive: '#8B5CF6',
@@ -48,8 +42,8 @@ const NoteDot: React.FC<{
     return null;
 }
 
-const GuitarNeck: React.FC<GuitarNeckProps> = ({ pentatonicNotes, displayNotes, notePositions }) => {
-    const svgRef = useRef<SVGSVGElement>(null);
+const GuitarNeck = ({ pentatonicNotes, displayNotes, notePositions }) => {
+    const svgRef = useRef(null);
     const [width, setWidth] = useState(0);
 
     useEffect(() => {
@@ -71,8 +65,8 @@ const GuitarNeck: React.FC<GuitarNeckProps> = ({ pentatonicNotes, displayNotes, 
     const NECK_WIDTH = width - NUT_WIDTH;
     const isPlaybackActive = !!(displayNotes.active || displayNotes.preview);
 
-    const getPosition = (fret: number): number => NUT_WIDTH + ((fret - 0.5) * (NECK_WIDTH / NUM_FRETS));
-    const getStringY = (stringIndex: number): number => (NECK_HEIGHT / 12) * (stringIndex * 2 + 1);
+    const getPosition = (fret) => NUT_WIDTH + ((fret - 0.5) * (NECK_WIDTH / NUM_FRETS));
+    const getStringY = (stringIndex) => (NECK_HEIGHT / 12) * (stringIndex * 2 + 1);
 
     const fretMarkers = { 3:1, 5:1, 7:1, 9:1, 12:2, 15:1, 17:1 };
 

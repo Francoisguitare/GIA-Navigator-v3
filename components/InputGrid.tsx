@@ -1,16 +1,8 @@
 
 import React from 'react';
-import { TOTAL_CELLS } from '../constants';
+import { TOTAL_CELLS } from '../constants.js';
 
-interface InputGridProps {
-    chords: string[];
-    onChordChange: (index: number, value: string) => void;
-    onClear: () => void;
-    onRandom: () => void;
-    activeGridIndex: number;
-}
-
-const InputGrid: React.FC<InputGridProps> = ({ chords, onChordChange, onClear, onRandom, activeGridIndex }) => {
+const InputGrid = ({ chords, onChordChange, onClear, onRandom, activeGridIndex }) => {
     return (
         <>
             <div className="flex justify-between items-center mb-2">
