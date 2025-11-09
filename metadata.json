@@ -1,0 +1,5 @@
+{
+  "name": "GIA Navigator v3",
+  "description": "An interactive web application for guitar players to visualize and understand music theory for improvisation. Enter a chord progression, and the app provides an action plan, highlighting tension, resolution, and target notes on a virtual guitar neck, complete with a backing track player.",
+  "requestFramePermissions": []
+}
