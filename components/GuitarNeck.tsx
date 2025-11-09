@@ -1,20 +1,21 @@
+
 import React, { useRef, useEffect, useState } from 'react';
 
 const NUM_FRETS = 17;
 const NECK_HEIGHT = 140;
 const NUT_WIDTH = 50;
 
-// FIX: Define prop types for NoteDot and type it as a React.FC to allow React-specific props like 'key'.
-interface NoteDotProps {
+// Fix: Add explicit props type to solve 'key' prop error.
+type NoteDotProps = {
     cx: number;
     cy: number;
     noteItem?: any;
     noteSelection?: any;
     isPreview?: boolean;
     isPlaybackActive: boolean;
-}
+};
 
-const NoteDot: React.FC<NoteDotProps> = ({ cx, cy, noteItem, noteSelection, isPreview, isPlaybackActive }) => {
+const NoteDot = ({ cx, cy, noteItem, noteSelection, isPreview, isPlaybackActive }: NoteDotProps) => {
     const colors = {
         fondatrice: '#10B981', 
         expressive: '#8B5CF6',

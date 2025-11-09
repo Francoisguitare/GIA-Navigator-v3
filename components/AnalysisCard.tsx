@@ -1,19 +1,20 @@
+
 import React from 'react';
 
-// FIX: Define prop types for AnalysisCard and type it as a React.FC to allow React-specific props like 'key'.
-interface AnalysisCardProps {
+// Fix: Add explicit props type to solve 'key' prop error.
+type AnalysisCardProps = {
     analysis: any;
-    setModalContent: (content: { title: string; body: string } | null) => void;
+    setModalContent: (content: { title: string; body: string; } | null) => void;
     onTargetNoteChange: (analysisIndex: number, optionIndex: number) => void;
     isSelected: boolean;
     onSelectToggle: (analysisIndex: number) => void;
     selectionColor: string;
     isPlaybackActive: boolean;
-}
+};
 
-const AnalysisCard: React.FC<AnalysisCardProps> = ({ analysis, setModalContent, onTargetNoteChange, isSelected, onSelectToggle, selectionColor, isPlaybackActive }) => {
+const AnalysisCard = ({ analysis, setModalContent, onTargetNoteChange, isSelected, onSelectToggle, selectionColor, isPlaybackActive }: AnalysisCardProps) => {
 
-    const handleBadgeClick = (e) => {
+    const handleBadgeClick = (e: React.MouseEvent) => {
         e.stopPropagation();
         let title = '', body = '';
         switch (analysis.front) {
